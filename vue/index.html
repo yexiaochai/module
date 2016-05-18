@@ -1,0 +1,39 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="./static/css/global.css" rel="stylesheet" type="text/css"/>
+    <link href="./pages/list.css" rel="stylesheet" type="text/css"/>
+    <title>组件化</title>
+</head>
+<body>
+<div class="cm-header">
+    <h1 class="cm-page-title js_title"> 组件化Demo </h1>
+</div>
+
+<article class="cm-page page-list" id="main">
+    <div class="js_sort_wrapper sort-bar-wrapper">
+        <my-sort-bar :sort="sort"></my-sort-bar>
+    </div>
+    <my-list :data="data" :sort="sort"></my-list>
+    <ul class="bus-tabs list-filter js_tabs " style="z-index: 3000;">
+        <my-tab-item :data="type"  name="车次类型"></my-tab-item>
+        <my-tab-item :data="setout"  name="出发站"></my-tab-item>
+        <li class="tabs-item js_more">更多<i class="icon-sec"></i>
+        </li>
+    </ul>
+</article>
+
+<script type="text/javascript" src="./libs/zepto.js"></script>
+<script type="text/javascript" src="./libs/underscore.js"></script>
+<script type="text/javascript" src="./libs/underscore.extend.js"></script>
+<script type="text/javascript" src="./libs/require.js"></script>
+<script type="text/javascript" src="main.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="./static/css/global.css" rel="stylesheet" type="text/css"/>
+    <link href="./pages/list.css" rel="stylesheet" type="text/css"/>
+    <title>组件化</title>
+</head>
+<body>
+
+<!--正确做法-->
+<article class="cm-page" id="main">
+    {{name}}
+    <my-component></my-component>
+    <my-list v-bind:data="data"></my-list>
+</article>
+
+
+<script type="text/javascript" src="./libs/underscore.js"></script>
+<script type="text/javascript" src="./libs/vue.js"></script>
+
+<script type="text/javascript">
+
+    // 定义
+    var MyComponent = Vue.extend({
+        template: '<div>A custom component!</div>'
+    })
+
+    // 注册
+    Vue.component('my-component', MyComponent)
+
+// 定义
+var MyList = Vue.extend({
+    props: ['data'],
+    template: [
+        '<ul>',
+            '<li v-for="item in data" >',
+                '{{item.name}}',
+            '</li>',
+        '</ul>'
+    ].join('')
+})
+
+// 注册
+Vue.component('my-list', MyList)
+
+// 创建根实例
+new Vue({
+    data: {
+        name: 'test',
+        data: /**/[
+            {name: '出发时间', id: 'time'},
+            {name: '耗时', id: 'sumTime'},
+            {name: '价格', id: 'price'}
+        ]
+    },
+    el: '#main'
+})
+
+
+</script>
+
+
+</body>
+</html>
