@@ -16,23 +16,376 @@
 </div>
 
 <article class="cm-page page-list" id="main">
-    <div class="js_sort_wrapper sort-bar-wrapper">
-        <my-sort-bar :sort="sort"></my-sort-bar>
-    </div>
-    <my-list :data="data" :sort="sort"></my-list>
-    <ul class="bus-tabs list-filter js_tabs " style="z-index: 3000;">
-        <my-tab-item :data="type"  name="车次类型"></my-tab-item>
-        <my-tab-item :data="setout"  name="出发站"></my-tab-item>
-        <li class="tabs-item js_more">更多<i class="icon-sec"></i>
-        </li>
-    </ul>
 </article>
 
-<script type="text/javascript" src="./libs/zepto.js"></script>
+
+<script src="./libs/react-with-addons.js"></script>
+<script src="./libs/JSXTransformer.js"></script>
+<script type="text/javascript" src="./pages/list.data.js"></script>
 <script type="text/javascript" src="./libs/underscore.js"></script>
-<script type="text/javascript" src="./libs/underscore.extend.js"></script>
-<script type="text/javascript" src="./libs/require.js"></script>
-<script type="text/javascript" src="main.js"></script>
+<script type="text/jsx">
+
+var MySortBar = React.createClass({
+    _getClassName: function(icon) {
+        return 'icon-sort ' + icon;
+    },
+
+    render: function () {
+        var state = this.props.state;
+        return (
+            <ul className="bus-tabs sort-bar js_sort_item">
+                <li className="tabs-item" onClick={this.props.setTime}  >出发时间<i className={this._getClassName(state.time)}></i></li>
+                <li className="tabs-item" onClick={this.props.setSumTime} >耗时<i className={this._getClassName(state.sumTime)}></i></li>
+                <li className="tabs-item"  onClick={this.props.setPrice} >价格<i className={this._getClassName(state.price)}></i></li>
+            </ul>
+        );
+    }
+
+});
+
+var Seat = React.createClass({
+    render: function () {
+        var seat = this.props.seat;
+
+        return (
+            <span >{seat.name}({seat.yupiao }) </span>
+        );
+    }
+});
+
+var Item = React.createClass({
+    render: function () {
+
+        var item = this.props.item;
+        var mapping = {
+            'g': '高速',
+            't': '特快',
+            'd': '高速动车',
+            'c': '城际高铁',
+            'z': '直达'
+        };
+
+        var seats = item.my_seats.map(function(item){
+            return <Seat seat={item}/>;
+        });
+
+
+        return (
+            <li className="bus-list-item ">
+                <div className="bus-seat">
+                    <span className=" fl">{item.train_number } | {mapping[item.my_train_number] || '其它'} </span>
+                    <span className=" fr">{parseInt(item.use_time / 60) + '小时' + item.use_time % 60 + '分'}</span>
+                    </div>
+                    <div className="detail">
+                    <div className="sub-list set-out">
+                    <span className="bus-go-off">{item.from_time}</span> <span className="start"><span className="icon-circle s-icon1">
+                    </span>{item.from_station }</span> <span className="fr price">￥{item.min_price}起</span>
+                </div>
+                <div className="sub-list">
+                        <span className="bus-arrival-time">{item.to_time}</span> <span className="end"><span className="icon-circle s-icon2">
+                        </span>{item.to_station}</span> <span className="fr ">{item.sum_ticket}张</span>
+                </div>
+                </div>
+                <div className="bus-seats-info" >
+                    {seats}
+                </div>
+            </li>
+        );
+    }
+});
+
+var MyList = React.createClass({
+
+    formatData: function (data) {
+
+        var item, seat;
+        var typeMap = {
+            'g': 'g',
+            'd': 'd',
+            't': 't',
+            'c': 'g'
+        };
+
+        //出发时间对应的分钟数
+        var fromMinute = 0;
+
+        //获取当前班车日期当前的时间戳,这个数据是动态的,这里写死了
+        var d = 1464192000000;
+        var date = new Date();
+        var now = parseInt(date.getTime() / 1000);
+        date.setTime(d);
+        var year = date.getFullYear();
+        var month = date.getMonth();
+        var day = date.getDate();
+        var toBegin;
+        var seatName, seatIndex, iii;
+
+        //处理坐席问题，仅显示二等座，一等座，特等座 无座
+        //                二等座 一等座 商务座 无座 动卧 特等座
+        var my_seats = {};
+        var seatSort = ['二等座', '一等座', '硬座', '硬卧', '软卧', '商务座', '无座', '动卧', '特等座', '软座'];
+
+        for (var i = 0, len = data.length; i < len; i++) {
+            fromMinute = data[i].from_time.split(':');
+            fromMinute[0] = fromMinute[0] + '';
+            fromMinute[1] = fromMinute[1] + '';
+            if ((fromMinute[0].charAt(0) == '0')) fromMinute[0] = fromMinute[0].charAt(1);
+            if ((fromMinute[1].charAt(0) == '0')) fromMinute[1] = fromMinute[1].charAt(1);
+            date = new Date(year, month, day, fromMinute[0], fromMinute[1], 0);
+            fromMinute = parseInt(date.getTime() / 1000)
+            toBegin = parseInt((fromMinute - now) / 60);
+
+            data[i].toBegin = toBegin;
+
+            //处理车次类型问题
+            data[i].my_train_number = typeMap[data[i].train_number.charAt(0).toLowerCase()] || 'other';
+
+            seat = data[i].seats;
+            //所有余票
+            data[i].sum_ticket = 0;
+            //最低价
+            data[i].min_price = null;
+
+            for (var j = 0, len1 = seat.length; j < len1; j++) {
+                if (!data[i].min_price || data[i].min_price > seat[j].seat_price) data[i].min_price = parseFloat(seat[j].seat_price);
+                data[i].sum_ticket += parseInt(seat[j].seat_yupiao);
+
+                //坐席问题如果坐席不包括上中下则去掉
+                seatName = seat[j].seat_name;
+                //去掉上中下
+                seatName = seatName.replace(/上|中|下/g, '');
+                if (!my_seats[seatName]) {
+                    my_seats[seatName] = parseInt(seat[j].seat_yupiao);
+                } else {
+                    my_seats[seatName] = my_seats[seatName] + parseInt(seat[j].seat_yupiao);
+                }
+            }
+            //这里myseat为对象，需要转换为数组
+            //将定制坐席转为排序后的数组
+            data[i].my_seats = [];
+            for (iii = 0; iii < seatSort.length; iii++) {
+                if (typeof my_seats[seatSort[iii]] == 'number') data[i].my_seats.push({
+                    name: seatSort[iii],
+                    yupiao: my_seats[seatSort[iii]]
+                });
+            }
+
+            my_seats = {};
+        }
+
+        return data;
+    },
+
+    _timeSort: function (data, sort) {
+        data = _.sortBy(data, function (item) {
+            item = item.from_time.split(':');
+            item = item[0] + '.' + item[1];
+            item = parseFloat(item);
+            return item;
+        });
+        if (sort == 'down') data.reverse();
+        return data;
+    },
+
+    _sumTimeSort: function (data, sort) {
+        data = _.sortBy(data, function (item) {
+            return parseInt(item.use_time);
+        });
+        if (sort == 'down') data.reverse();
+        return data;
+    },
+
+    _priceSort: function (data, sort) {
+        data = _.sortBy(data, function (item) {
+            return item.min_price;
+        });
+        if (sort == 'down') data.reverse();
+        return data;
+    },
+
+    //获取导航栏排序后的数据
+    getSortData: function (data) {
+        var tmp = [];
+        var sort = this.props.state;
+
+        for (var k in sort) {
+            if (sort[k].length > 0) {
+                tmp = this['_' + k + 'Sort'](data, sort[k])
+                return tmp;
+            }
+        }
+    },
+
+    render: function () {
+
+        var main;
+        var data = this.formatData(this.props.data);
+        data = this.getSortData(data);
+
+        main = data.map(function(item) {
+            return <Item item={item}/>;
+        });
+
+        return (
+            <ul className="bus-list js_bus_list ">
+                {main}
+            </ul>
+        );
+    }
+
+});
+
+var App = React.createClass({
+    getInitialState: function() {
+        return {
+            time: 'up',
+            sumTime: '',
+            price: ''
+        };
+    },
+
+    resetData: function () {
+        this.setState({
+            time: '',
+            sumTime: '',
+            price: ''
+        });
+    },
+
+    setTime: function () {
+        this._setData('time');
+    },
+
+    setSumTime: function () {
+        this._setData('sumTime');
+    },
+
+    setPrice: function () {
+        this._setData('price');
+    },
+
+    _setData: function (key) {
+        var param = {};
+
+        //如果设置当前key存在，则反置，否则清空筛选，设置默认值
+        if (this.state[key] != '') {
+            if (this.state[key] == 'up') param[key] = 'down';
+            else param[key] = 'up';
+        } else {
+            this.resetData();
+            param[key] = 'down';
+        }
+        this.setState(param);
+    },
+
+    formatData: function (data) {
+
+        var item, seat;
+        var typeMap = {
+            'g': 'g',
+            'd': 'd',
+            't': 't',
+            'c': 'g'
+        };
+
+        //出发时间对应的分钟数
+        var fromMinute = 0;
+
+        //获取当前班车日期当前的时间戳,这个数据是动态的,这里写死了
+        var d = 1464192000000;
+        var date = new Date();
+        var now = parseInt(date.getTime() / 1000);
+        date.setTime(d);
+        var year = date.getFullYear();
+        var month = date.getMonth();
+        var day = date.getDate();
+        var toBegin;
+        var seatName, seatIndex, iii;
+
+        //处理坐席问题，仅显示二等座，一等座，特等座 无座
+        //                二等座 一等座 商务座 无座 动卧 特等座
+        var my_seats = {};
+        var seatSort = ['二等座', '一等座', '硬座', '硬卧', '软卧', '商务座', '无座', '动卧', '特等座', '软座'];
+
+        for (var i = 0, len = data.length; i < len; i++) {
+            fromMinute = data[i].from_time.split(':');
+            fromMinute[0] = fromMinute[0] + '';
+            fromMinute[1] = fromMinute[1] + '';
+            if ((fromMinute[0].charAt(0) == '0')) fromMinute[0] = fromMinute[0].charAt(1);
+            if ((fromMinute[1].charAt(0) == '0')) fromMinute[1] = fromMinute[1].charAt(1);
+            date = new Date(year, month, day, fromMinute[0], fromMinute[1], 0);
+            fromMinute = parseInt(date.getTime() / 1000)
+            toBegin = parseInt((fromMinute - now) / 60);
+
+            data[i].toBegin = toBegin;
+
+            //处理车次类型问题
+            data[i].my_train_number = typeMap[data[i].train_number.charAt(0).toLowerCase()] || 'other';
+
+            seat = data[i].seats;
+            //所有余票
+            data[i].sum_ticket = 0;
+            //最低价
+            data[i].min_price = null;
+
+            for (var j = 0, len1 = seat.length; j < len1; j++) {
+                if (!data[i].min_price || data[i].min_price > seat[j].seat_price) data[i].min_price = parseFloat(seat[j].seat_price);
+                data[i].sum_ticket += parseInt(seat[j].seat_yupiao);
+
+                //坐席问题如果坐席不包括上中下则去掉
+                seatName = seat[j].seat_name;
+                //去掉上中下
+                seatName = seatName.replace(/上|中|下/g, '');
+                if (!my_seats[seatName]) {
+                    my_seats[seatName] = parseInt(seat[j].seat_yupiao);
+                } else {
+                    my_seats[seatName] = my_seats[seatName] + parseInt(seat[j].seat_yupiao);
+                }
+            }
+            //这里myseat为对象，需要转换为数组
+            //将定制坐席转为排序后的数组
+            data[i].my_seats = [];
+            for (iii = 0; iii < seatSort.length; iii++) {
+                if (typeof my_seats[seatSort[iii]] == 'number') data[i].my_seats.push({
+                    name: seatSort[iii],
+                    yupiao: my_seats[seatSort[iii]]
+                });
+            }
+
+            my_seats = {};
+        }
+
+        return data;
+    },
+
+    render: function () {
+
+        var main;
+        var data = this.formatData(this.props.data);
+        main = data.map(function(item) {
+            return <Item item={item}/>;
+        });
+
+        return (
+            <div>
+                <div className="js_sort_wrapper sort-bar-wrapper">
+                <MySortBar state={this.state} setTime={this.setTime} setSumTime={this.setSumTime} setPrice={this.setPrice}/>
+                </div>
+                <MyList data={data} state={this.state} />
+            </div>
+        );
+    }
+
+});
+
+var data = getListData();
+
+React.render(
+    <App data={data}/>,
+    document.getElementById('main')
+);
+
+</script>
 
 
 </body>

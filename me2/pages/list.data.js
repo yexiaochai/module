@@ -1,4 +1,4 @@
-define([], function () {
+function getListData() {
 
     return [
         {
@@ -5821,5 +5821,4 @@ define([], function () {
                 "seat_yupiao": 29
             }, {"seat_price": "28.5", "seat_name": "无座", "seat_bookable": 1, "seat_yupiao": 430}]
         }];
-
-});
+}
