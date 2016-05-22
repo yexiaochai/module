@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="./static/css/global.css" rel="stylesheet" type="text/css"/>
+    <link href="./pages/list.css" rel="stylesheet" type="text/css"/>
+    <title>组件化</title>
+</head>
+<body>
+<div class="cm-header">
+    <h1 class="cm-page-title js_title"> 摆脱Dom操作 </h1>
+</div>
+
+<article class="cm-page page-list" id="main">
+    <div class="js_sort_wrapper sort-bar-wrapper">
+        <mySortBar :entity="sortEntity" :myname="111"></mySortBar>
+    </div>
+    <myList :entity="sortEntity" :sort="sort"></myList>
+</article>
+
+<script type="text/javascript" src="./libs/zepto.js"></script>
+<script type="text/javascript" src="./libs/underscore.js"></script>
+<script src="./libs/underscore.extend.js" type="text/javascript"></script>
+<script type="text/javascript" src="./libs/require.js"></script>
+<script type="text/javascript">
+
+(function () {
+    require.config({
+        paths: {
+            'text': 'libs/require.text',
+
+            'AbstractView': 'js/view',
+            'AbstractEntity': 'js/entity',
+            'ModuleView': 'js/module'
+        }
+    });
+
+    require(['pages/list.label'], function (List) {
+        var list = new List();
+        list.show();
+    });
+})();
+
+
+</script>
+
+</body>
+</html>

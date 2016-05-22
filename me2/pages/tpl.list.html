@@ -1,0 +1,39 @@
+﻿<% 
+var mapping = {
+    'g': '高速',
+    't': '特快',
+    'd': '高速动车',
+    'c': '城际高铁',
+    'z': '直达'
+};
+
+%>
+
+<ul class="bus-list js_bus_list ">
+<% for(var i = 0, len = data.length; i < len; i++) { %>
+<% var item = data[i] %>
+
+    <li data-index="<%=i %>" data-dstation=<%=item.from_station %>  class="bus-list-item ">
+        <div class="bus-seat">
+            <span class=" fl"><%=item.train_number %> | <%=mapping[item.my_train_number] || '其它' %></span><span class=" fr"><%=parseInt(item.use_time / 60) + '小时' + item.use_time % 60 + '分' %> </span>
+        </div>
+        <div class="detail">
+            <div class="sub-list set-out">
+                <span class="bus-go-off"><%=item.from_time %></span> <span class="start"><span class="icon-circle s-icon1">
+                </span><%=item.from_station %></span> <span class="fr price">￥<%=item.min_price %>起</span>
+            </div>
+            <div class="sub-list">
+                <span class="bus-arrival-time"><%=item.to_time %></span> <span class="end"><span class="icon-circle s-icon2">
+                </span><%=item.to_station %></span> <span class="fr "><%=item.sum_ticket %>张</span>
+            </div>
+        </div>
+        <div class="bus-seats-info" >
+            <% for(var i1 = 0, len1 = item.my_seats.length; i1 < len1 && i1 < 4 ; i1++) { %>
+            <% var seat = item.my_seats[i1]; %>
+                <span><%=seat.name %>(<%=seat.yupiao %>) </span>
+            <%} %>
+        </div>
+    </li>
+<%} %>
+</ul>
+
