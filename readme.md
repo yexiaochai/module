@@ -8,3 +8,7 @@
 Vue demo:http://yexiaochai.github.io/module/vue/index.html
 
 React demo:http://yexiaochai.github.io/module/react/index.html
+
+##通用活动模板调研
+博客:http://www.cnblogs.com/yexiaochai/p/5597940.html
+演示地址: http://yexiaochai.github.io/module/activity/index.html
