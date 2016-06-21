@@ -1,0 +1,184 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="./static/css/global.css" rel="stylesheet" type="text/css"/>
+    <title>活动发布平台</title>
+
+    <style type="text/css">
+        .widget-wrapper {
+            position: absolute;
+            right: 0;
+            top: 0;
+            border: 1px solid black;
+            width: 38%;
+            min-height: 100px;
+        }
+
+        .activity-wrapper {
+            margin-right: 40%;
+            border: 1px solid black;
+            min-height: 100px;
+        }
+
+        .widget-item {
+            min-height: 50px;
+            margin: 10px;
+            border: 1px solid gray;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<article class="cm-page" id="main">
+    <div class="activity-wrapper js-activity-wrapper">
+    </div>
+    <div class="widget-wrapper js-widget-wrapper">
+    </div>
+</article>
+
+<script type="text/javascript" src="./libs/zepto.js"></script>
+<script type="text/javascript" src="./libs/underscore.js"></script>
+<script src="./libs/underscore.extend.js" type="text/javascript"></script>
+
+<textarea id="template" style="display: none;">
+<div class="activity">
+    <h2><%=activity.title%></h2>
+    <ul>
+    <% for(var i = 0, len = widgets.length; i < len; i++) { %>
+        <% var item = widgets[i]; %>
+        <% var data = item.data; %>
+        <li class="js-widget-item widget-item" data-id="<%=item.id%>">
+            <% if(item.type == 'title') { %>
+                <h2><%=data.title%></h2>
+            <% } else if(item.type == 'img') { %>
+                <% if(data.link) { %> <a href="<%data.link%>"><% } %>
+                    <img src="<%=data.src%>" alt="<%=data.alt%>" >
+                <% if(item.link) { %></a><% } %>
+            <% } else if(item.type == 'vote') { %>
+                <% if(data.items.length > 0) { %>
+                    <% for(var j = 0, len1 = data.items.length; j < len1; j++) { %>
+                        <div>
+                            <label><input type="radio"><%data.items[j]%></label>
+                        </div>
+                    <% } %>
+                <% } %>
+            <%}%>
+        </li>
+    <% } %>
+    </ul>
+</div>
+</textarea>
+<textarea id="template2" style="display: none;">
+<ul class="js-item-wrapper" data-id="<%=id%>">
+<% for(var k in data) { %>
+    <li>
+        <div><%=k%>:</div>
+        <input class="js-input-item" data-key="<%=k%>" value="<%=data[k]%>">
+    </li>
+<% } %>
+</ul>
+<button class="js-save">保存</button>
+</textarea>
+
+<script type="text/javascript">
+
+var actId = _.uniqueId('activity_');
+var template = $('#template').val();
+var template2 = $('#template2').val();
+
+var activity = {
+    id: actId,
+    title: '活动测试'
+};
+
+var wTitleId = _.uniqueId('widget_');
+var wImgId = _.uniqueId('widget_');
+var wVoteId = _.uniqueId('widget_');
+
+//首先实例化三个组件
+var widgetTitle = {
+    id: wTitleId,
+    type: 'title',
+    //编辑部分
+    data: {title: ''}
+};
+
+var widgetImg = {
+    id: wImgId,
+    type: 'img',
+    data: {src: '', alt: '111', link: ''},
+};
+
+var widgetVote = {
+    id: wVoteId,
+    type: 'vote',
+    data: {items: []}
+};
+
+//映射为一个数据表
+var widgets = {
+    wTitleId: widgetTitle,
+    wImgId: widgetImg,
+    wVoteId: widgetVote
+};
+
+var activity_widget = {
+    activity: {
+        id: actId,
+        title: '活动测试'
+    },
+//    widgets: [wTitleId, wImgId, wVoteId],
+    widgets: [widgetTitle, widgetImg, widgetVote]
+};
+
+function  renderActivity() {
+    var html = _.template(template, activity_widget);
+    $('.js-activity-wrapper').html(html);
+}
+$('#main').on('click', '.js-widget-item', function(e) {
+    var el = $(e.currentTarget);
+    var id = el.attr('data-id');
+    var w = _.find(widgets, function(item) {
+        return item.id == id
+    });
+    var data = w.data;
+
+    var html = _.template(template2, {data: data, id: id});
+
+    $('.js-widget-wrapper').html(html);
+
+});
+
+//点击保存某一个dom的更新
+$('#main').on('click', '.js-save', function(e) {
+    var root = $('.js-item-wrapper');
+    var id = root.attr('data-id');
+    var data = {};
+    var items = root.find('.js-input-item');
+    $.each(items, function(index, item) {
+        item = $(item);
+        data[item.attr('data-key')] = item.val();
+    });
+    var w = _.find(widgets, function(item) {
+        return item.id == id
+    });
+    w.data = data;
+    renderActivity();
+});
+
+
+renderActivity();
+
+</script>
+
+
+
+</body>
+</html>

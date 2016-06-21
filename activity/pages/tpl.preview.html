@@ -1,0 +1,14 @@
+﻿<section class="cm-modal js-widget-item " >
+    <div class="cm-modal-bd">
+        <ul class=" cm-checkbox-list">
+            <% for(var i = 0, len = data.length; i < len; i++) { %>
+            <li data-index="<%=i%>"><i class="icon-checkbox"></i><%=data[i]%></li>
+            <% } %>
+        </ul>
+    </div>
+    <footer class="cm-actions">
+        <span class="cm-actions-btn js-widget-del"  data-index="<%=index%>">删除</span>
+        <span class="cm-actions-btn js-widget-edit"  data-index="<%=index%>">编辑</span>
+    </footer>
+</section>
+

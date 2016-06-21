@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui"/>
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta name="format-detection" content="telephone=no"/>
+    <link href="./static/css/global.css" rel="stylesheet" type="text/css"/>
+    <title>活动发布平台</title>
+
+    <style type="text/css">
+        .widget-wrapper {
+            position: absolute;
+            right: 0;
+            top: 0;
+            border: 1px solid black;
+            width: 38%;
+            min-height: 100px;
+        }
+
+        .activity-wrapper {
+            margin-right: 40%;
+            border: 1px solid black;
+            min-height: 100px;
+        }
+
+        .widget-item {
+            min-height: 50px;
+            margin: 10px;
+            border: 1px solid gray;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<article class="cm-page" id="main">
+    <div class="activity-wrapper js-activity-wrapper">
+    </div>
+    <div class="widget-wrapper js-widget-wrapper">
+    </div>
+</article>
+
+<script type="text/javascript" src="./libs/zepto.js"></script>
+<script type="text/javascript" src="./libs/underscore.js"></script>
+<script src="./libs/underscore.extend.js" type="text/javascript"></script>
+<script src="./main.js" type="text/javascript"></script>
+
+</body>
+</html>

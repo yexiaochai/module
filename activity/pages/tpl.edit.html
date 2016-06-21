@@ -1,0 +1,17 @@
+﻿<div class="form">
+
+    <% for(var i = 0, len = data.length; i < len; i++) { %>
+
+    <div class="form-item">
+        <label class="field-label btn js-delete">删除</label>
+        <input type="text" value="<%=data[i]%>" class="field-text js-item">
+    </div>
+
+    <% } %>
+</div>
+
+<div class="btns-seperate-group">
+    <span class="btn btn-primary js-add">新增一项</span>
+    <span class="btn btn-primary js-ok">保存</span>
+
+</div>
